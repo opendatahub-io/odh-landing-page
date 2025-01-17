@@ -30,6 +30,7 @@ import NotebookSizeDetails from './NotebookSizeDetails';
 import useNotebookImage from './useNotebookImage';
 import useNotebookDeploymentSize from './useNotebookDeploymentSize';
 import useNotebookAcceleratorProfileFormState from './useNotebookAcceleratorProfileFormState';
+import { extractAcceleratorResources } from './utils';
 
 type NotebookTableRowProps = {
   obj: NotebookState;
@@ -52,6 +53,10 @@ const NotebookTableRow: React.FC<NotebookTableRowProps> = ({
   const navigate = useNavigate();
   const [isExpanded, setExpanded] = React.useState(false);
   const { size: notebookSize } = useNotebookDeploymentSize(obj.notebook);
+  const acceleratorResources = extractAcceleratorResources(
+    obj.notebook.spec.template.spec.containers[0].resources,
+  );
+
   const lastDeployedSize: NotebookSize = {
     name: 'Custom',
     resources: obj.notebook.spec.template.spec.containers[0].resources ?? {
@@ -234,7 +239,10 @@ const NotebookTableRow: React.FC<NotebookTableRowProps> = ({
           </Td>
           <Td dataLabel="Limits">
             <ExpandableRowContent>
-              <NotebookSizeDetails notebookSize={notebookSize || lastDeployedSize} />
+              <NotebookSizeDetails
+                notebookSize={notebookSize || lastDeployedSize}
+                acceleratorResources={acceleratorResources}
+              />
             </ExpandableRowContent>
           </Td>
           <Td />
