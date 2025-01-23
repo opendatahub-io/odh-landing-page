@@ -20,6 +20,7 @@
 <!--- Go over all the following points, and put an `x` in all the boxes that apply. -->
 
 Self checklist (all need to be checked):
+- [ ] [Frontend E2E Tests] Run the `e2e tests locally`, see the `package.json, and the `cypress` group of commands https://github.com/opendatahub-io/odh-dashboard/blob/main/frontend/package.json#L42
 - [ ] The developer has manually tested the changes and verified that the changes work
 - [ ] Testing instructions have been added in the PR body (for PRs involving changes that are not immediately obvious).
 - [ ] The developer has added tests or explained why testing cannot be added (unit or cypress tests for related changes)
