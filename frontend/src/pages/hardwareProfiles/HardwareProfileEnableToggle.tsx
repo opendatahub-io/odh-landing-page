@@ -3,18 +3,21 @@ import { Switch } from '@patternfly/react-core';
 import useNotification from '~/utilities/useNotification';
 import { toggleHardwareProfileEnablement } from '~/api';
 import { HardwareProfileKind } from '~/k8sTypes';
+import { HARDWARE_PROFILES_MISSING_CPU_MEMORY_MESSAGE } from './nodeResource/const';
+import { hardwareProfileWarning } from './utils';
 
 type HardwareProfileEnableToggleProps = {
   hardwareProfile: HardwareProfileKind;
-  refreshHardwareProfiles: () => void;
 };
 
 const HardwareProfileEnableToggle: React.FC<HardwareProfileEnableToggleProps> = ({
   hardwareProfile,
-  refreshHardwareProfiles,
 }) => {
-  const { enabled } = hardwareProfile.spec;
-  const [isEnabled, setEnabled] = React.useState(enabled);
+  const hardwareProfileWarningMessage = hardwareProfileWarning(hardwareProfile);
+  const enabled =
+    hardwareProfile.spec.enabled &&
+    (typeof hardwareProfileWarningMessage === 'undefined' ||
+      hardwareProfileWarningMessage.message.includes(HARDWARE_PROFILES_MISSING_CPU_MEMORY_MESSAGE));
   const [isLoading, setLoading] = React.useState(false);
   const notification = useNotification();
 
@@ -25,16 +28,11 @@ const HardwareProfileEnableToggle: React.FC<HardwareProfileEnableToggleProps> = 
       hardwareProfile.metadata.namespace,
       checked,
     )
-      .then(() => {
-        setEnabled(checked);
-        refreshHardwareProfiles();
-      })
       .catch((e) => {
         notification.error(
           `Error ${checked ? 'enable' : 'disable'} the hardware profile`,
           e.message,
         );
-        setEnabled(!checked);
       })
       .finally(() => {
         setLoading(false);
@@ -46,8 +44,14 @@ const HardwareProfileEnableToggle: React.FC<HardwareProfileEnableToggleProps> = 
       aria-label={enabled ? 'enabled' : 'stopped'}
       data-testid="enable-switch"
       id={`${hardwareProfile.metadata.name}-enable-switch`}
-      isChecked={isEnabled}
-      isDisabled={isLoading}
+      isChecked={enabled}
+      isDisabled={
+        (typeof hardwareProfileWarningMessage !== 'undefined' &&
+          !hardwareProfileWarningMessage.message.includes(
+            HARDWARE_PROFILES_MISSING_CPU_MEMORY_MESSAGE,
+          )) ||
+        isLoading
+      }
       onChange={(_e, checked) => handleChange(checked)}
     />
   );
