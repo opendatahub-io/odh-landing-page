@@ -52,8 +52,12 @@ import K8sNameDescriptionField, {
 } from '~/concepts/k8s/K8sNameDescriptionField/K8sNameDescriptionField';
 import { isK8sNameDescriptionDataValid } from '~/concepts/k8s/K8sNameDescriptionField/utils';
 import { validateEnvVarName } from '~/concepts/connectionTypes/utils';
+<<<<<<< HEAD
 import { useKServeDeploymentMode } from '~/pages/modelServing/useKServeDeploymentMode';
 import usePrefillDeployModalConnectionFromModelRegistry from '~/pages/modelRegistry/screens/RegisteredModels/usePrefillDeployModalConnectionFromModelRegistry';
+=======
+import usePrefillDeployModalFromModelRegistry from '~/pages/modelRegistry/screens/RegisteredModels/usePrefillDeployModalFromModelRegistry';
+>>>>>>> 6e27303e (Add alert to prefilled modal and some name changes)
 import KServeAutoscalerReplicaSection from './KServeAutoscalerReplicaSection';
 import EnvironmentVariablesSection from './EnvironmentVariablesSection';
 import ServingRuntimeArgsSection from './ServingRuntimeArgsSection';
@@ -136,7 +140,7 @@ const ManageKServeModal: React.FC<ManageKServeModalProps> = ({
   });
 
   const [connections, connectionsLoaded, connectionsLoadError] =
-    usePrefillDeployModalConnectionFromModelRegistry(
+    usePrefillDeployModalFromModelRegistry(
       projectContext,
       createDataInferenceService,
       setCreateDataInferenceService,
