@@ -4,10 +4,11 @@ import {
   asProductAdminUser,
   asProjectAdminUser,
 } from '~/__tests__/cypress/cypress/utils/mockUsers';
-import { mockDashboardConfig } from '~/__mocks__';
+import { mockDashboardConfig, mockDscStatus, dataScienceStackComponentMap } from '~/__mocks__';
 import { aboutDialog } from '~/__tests__/cypress/cypress/pages/aboutDialog';
 import { mockConsoleLinks } from '~/__mocks__/mockConsoleLinks';
 import { loginDialog } from '~/__tests__/cypress/cypress/pages/loginDialog';
+import { DataScienceStackComponent } from '~/concepts/areas/types';
 
 describe('Application', () => {
   it('should disallow access to the dashboard', () => {
@@ -74,6 +75,25 @@ describe('Application', () => {
     aboutDialog.findLastUpdate().should('contain.text', 'June 25, 2024');
   });
 
+  it('should show the about modal for ODH component releases table', () => {
+    cy.interceptOdh('GET /api/dsc/status', mockDscStatus({}));
+
+    appChrome.visit();
+    aboutDialog.show();
+
+    aboutDialog.findTable().should('exist');
+    const row1 = aboutDialog.getComponentReleasesRow(
+      dataScienceStackComponentMap[DataScienceStackComponent.MODEL_REGISTRY],
+    );
+    row1.find().findByText('Kubeflow Model Registry').should('exist');
+    row1.find().findByText('1.14.0').should('exist');
+    const row2 = aboutDialog.getComponentReleasesRow(
+      dataScienceStackComponentMap[DataScienceStackComponent.K_SERVE],
+    );
+    row2.find().findByText('KServe Operator').should('exist');
+    row2.find().findByText('v0.2.13').should('exist');
+  });
+
   it('should show the about modal correctly when release name is not available', () => {
     cy.interceptOdh('GET /api/operator-subscription-status', {
       channel: 'fast',
@@ -114,6 +134,7 @@ describe('Application', () => {
     aboutDialog.findText().should('contain.text', 'OpenShift');
     aboutDialog.findProductName().should('contain.text', 'OpenShift AI');
   });
+
   it('should show the login modal when receiving a 403 status code', () => {
     // Mock the intercept to return a 403 status code
     cy.interceptOdh('GET /api/config', {
