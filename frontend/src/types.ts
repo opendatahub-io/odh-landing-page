@@ -725,3 +725,8 @@ export type IntegrationAppStatus = {
   variablesValidationTimestamp?: string;
   error: string;
 };
+
+export type WarningNotification = {
+  title: string;
+  message: string;
+};
