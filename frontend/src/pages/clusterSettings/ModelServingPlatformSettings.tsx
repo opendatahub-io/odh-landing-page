@@ -16,10 +16,11 @@ import SimpleSelect from '~/components/SimpleSelect';
 import { ModelServingPlatformEnabled } from '~/types';
 import useServingPlatformStatuses from '~/pages/modelServing/useServingPlatformStatuses';
 import { useKServeDeploymentMode } from '~/pages/modelServing/useKServeDeploymentMode';
-import { useAccessReview } from '~/api';
+import { DataScienceClusterModel, useAccessReview } from '~/api';
 import { AccessReviewResourceAttributes, DeploymentMode } from '~/k8sTypes';
 import { useOpenShiftURL } from '~/utilities/clusterUtils';
 import DashboardHelpTooltip from '~/concepts/dashboard/DashboardHelpTooltip';
+import { useAccessAllowed, verbModelAccess } from '~/concepts/userSSAR';
 
 type ModelServingPlatformSettingsProps = {
   initialValue: ModelServingPlatformEnabled;
@@ -49,8 +50,12 @@ const ModelServingPlatformSettings: React.FC<ModelServingPlatformSettingsProps> 
     modelMesh: { installed: modelMeshInstalled },
   } = useServingPlatformStatuses();
 
-  const [allowUpdate] = useAccessReview(accessReviewResource);
+  const [allowUpdate] = useAccessReview(accessReviewResource); // TODO: remove and use allowedToPatchDSC
   const url = useOpenShiftURL();
+
+  const [allowedToPatchDSC, loadedAllowed] = useAccessAllowed(
+    verbModelAccess('patch', DataScienceClusterModel),
+  );
 
   React.useEffect(() => {
     const kServeDisabled = !enabledPlatforms.kServe || !kServeInstalled;
@@ -133,7 +138,8 @@ const ModelServingPlatformSettings: React.FC<ModelServingPlatformSettingsProps> 
             name="singleModelServingPlatformEnabledCheckbox"
             body={
               kServeInstalled &&
-              isRawAvailable && (
+              isRawAvailable &&
+              loadedAllowed && (
                 <FormGroup
                   fieldId="default-deployment-mode-select"
                   label="Default deployment mode"
@@ -155,12 +161,12 @@ const ModelServingPlatformSettings: React.FC<ModelServingPlatformSettingsProps> 
                       {
                         key: DeploymentMode.RawDeployment,
                         label: 'Standard (No additional dependencies)',
-                        isDisabled: true, // todo: allow admin to update dsc
+                        isDisabled: !allowedToPatchDSC,
                       },
                       {
                         key: DeploymentMode.Serverless,
                         label: 'Advanced (Serverless and Service Mesh)',
-                        isDisabled: !isServerlessAvailable || true, // todo: allow admin to update dsc
+                        isDisabled: !isServerlessAvailable && !allowedToPatchDSC,
                       },
                     ]}
                     isDisabled={!enabledPlatforms.kServe}
